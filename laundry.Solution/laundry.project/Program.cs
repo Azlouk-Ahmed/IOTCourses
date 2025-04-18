@@ -79,7 +79,7 @@ namespace laundry.project
             ConsoleUI.ShowLoading("Initializing system components...");
             SensorManager sensor = new();
 
-            string connectionString = "HostName=tpnumero3.azure-devices.net;DeviceId=my-device-id;SharedAccessKey=pdkW0Ryvk4tcmW3PaD7/ToSIRluoweUW1iccqtrqUkc=";
+            string connectionString = "Votre chaîne de connexion IoT Hub à récupérer depuis le portail Azure";
 
 
             var compositeSender = new CompositeSender();
