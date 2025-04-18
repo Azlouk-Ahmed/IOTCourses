@@ -2,43 +2,104 @@
 using laundry.project.Entities;
 using laundry.project.Infrastructure;
 using laundry.project.Infrastructure.Sender;
+using laundry.project.Interfaces;
 using laundry.project.Presentation;
+using laundry.project.Presentation.ConsoleUi;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 
-SetConsoleSizeToMax();
-"Reading config file...".WriteLineRight(ConsoleColor.Blue);
-
-"Reading config file...".WriteLineLeft(ConsoleColor.White);
-ConfigurationManager configService = new();
-DisplayManager displaySercice = new DisplayManager();
-"Config File Path : ".WriteLeft(ConsoleColor.White);
-string fileConfigFilePath=Console.ReadLine();
-"Config File Name : ".WriteLeft(ConsoleColor.White);
-string fileConfigFileName = Console.ReadLine();
-List<Machine> machines = configService.SetConfig(fileConfigFilePath +"\\"+ fileConfigFileName);
-SensorManager sensor = new SensorManager();
-ISender sender = new ConsoleSender();
-StateMachineManager.LancerStateMachine(machines, sensor, sender);
-displaySercice.DicplayConfiguration(machines,Structure.MapInputMachine);
-displaySercice.DicplayMenuPrincipale(machines, Structure.MapInputMachine);
-static void SetConsoleSizeToMax()
+namespace laundry.project
 {
-    try
+    class Program
     {
-        // Obtenir la taille maximale possible de la console
-        int maxWidth = Console.LargestWindowWidth;
-        int maxHeight = Console.LargestWindowHeight;
+        static void Main()
+        {
+            ConsoleUI.SetConsoleSizeToMax();
+            ConsoleUI.ShowWelcomeScreen();
 
-        // Définir la taille de la fenêtre de la console
-        Console.SetWindowSize(maxWidth, maxHeight);
+            var configManager = new ConfigurationManager();
+            var displayManager = new DisplayManager();
+            var machines = LoadConfiguration(configManager);
 
-        // Définir la taille du tampon de la console
-        Console.SetBufferSize(maxWidth, maxHeight);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Erreur lors de la définition de la taille de la console : {ex.Message}");
+            InitializeSystemComponents(machines);
+
+            displayManager.DisplayConfiguration(machines, Structure.MapInputMachine);
+            displayManager.DisplayMenuPrincipale(machines, Structure.MapInputMachine);
+        }
+
+        
+
+        
+
+        static List<Machine> LoadConfiguration(ConfigurationManager configService)
+        {
+            string path, fileName;
+            List<Machine> machines = null;
+
+            while (true)
+            {
+                try
+                {
+                    PromptInput("Please enter configuration details:");
+
+                    path = Prompt("Config File Path: ");
+                    fileName = Prompt("Config File Name: ");
+                    string fullPath = Path.Combine(path, fileName);
+
+                    if (!File.Exists(fullPath))
+                    {
+                        ConsoleUI.ShowError("File not found! Please check the path and filename.");
+                        continue;
+                    }
+
+                    ConsoleUI.ShowLoading("Loading configuration...");
+
+                    machines = configService.SetConfig(fullPath);
+
+                    if (machines == null || machines.Count == 0)
+                    {
+                        ConsoleUI.ShowError("No machines found in configuration file.");
+                        continue;
+                    }
+
+                    ConsoleUI.ShowSuccess($"Configuration loaded successfully! {machines.Count} machines found.");
+                    return machines;
+                }
+                catch (Exception ex)
+                {
+                    ConsoleUI.ShowError($"Error loading configuration: {ex.Message}");
+                }
+            }
+        }
+
+        static void InitializeSystemComponents(List<Machine> machines)
+        {
+            ConsoleUI.ShowLoading("Initializing system components...");
+            SensorManager sensor = new();
+            ISender sender = new ConsoleSender();
+
+            ConsoleUI.ShowLoading("Starting machine monitoring...");
+            StateMachineManager.LancerStateMachine(machines, sensor, sender);
+
+            ConsoleUI.ShowSuccess("System initialization complete.");
+            Thread.Sleep(1500);
+        }
+
+        // Utility methods
+      
+
+        static void PromptInput(string message)
+        {
+            message.WriteLineLeft(ConsoleColor.White);
+            "".WriteLineLeft(ConsoleColor.White);
+        }
+
+        static string Prompt(string label)
+        {
+            label.WriteLeft(ConsoleColor.White);
+            return Console.ReadLine();
+        }
     }
 }
-
-

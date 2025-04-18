@@ -12,4 +12,4 @@ namespace laundry.project.Entities
         public static Dictionary<int, int> MapInputTension = new Dictionary<int, int>();
        
     }
-}
+}   

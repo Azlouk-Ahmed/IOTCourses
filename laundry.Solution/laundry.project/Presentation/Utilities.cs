@@ -1,122 +1,106 @@
-﻿using laundry.project.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace laundry.project.Presentation
 {
-    public enum ConsoleZone { Left, Right };
-
+    public enum ConsoleZone { Left, Right }
 
     internal static class Uitility
     {
-        static int _leftSide;
-        static int _rightSide = Console.WindowWidth / 2;
-        static int _leftTop;
-        static int _rigtTop;
-        static int _lastLeftStringwrittenLength;
-        public static object _consoleLock = new object();
-        public static object _consoleLockDroite = new object();
-        public static void ClearHalfConsole(ConsoleZone consoleZone, int colonne, ref int ligne)
+        private static readonly object _lockLeft = new();
+        private static readonly object _lockRight = new();
+
+        private static int _topLeft = 0;
+        private static int _topRight = 0;
+
+        private static readonly int Margin = 2;
+
+        private static int HalfWidth => Console.WindowWidth / 2;
+        private static int LeftStart => Margin;
+        private static int RightStart => HalfWidth + Margin;
+
+        public static void ClearZone(ConsoleZone zone)
         {
-            if (ligne < 50) return;
-            int startColumn;
-            // Calculer la colonne de départ (milieu de la console)
-            if (consoleZone == ConsoleZone.Right)
-                startColumn = Console.WindowWidth / 2;
-            else
-                startColumn = 0;
-            // Parcourir toutes les lignes de la console
-            for (int row = 0; row < ligne; row++)
+            int startColumn = zone == ConsoleZone.Left ? 0 : HalfWidth;
+            int width = HalfWidth;
+
+            for (int row = 0; row < Console.WindowHeight; row++)
             {
-                // Positionner le curseur au début de la moitié droite
                 Console.SetCursorPosition(startColumn, row);
-
-                // Écrire des espaces pour effacer la moitié droite
-                Console.Write(new string(' ', Console.WindowWidth / 2 - startColumn));
+                Console.Write(new string(' ', width));
             }
-            ligne = 1;
 
-            Console.SetCursorPosition(++_lastLeftStringwrittenLength, ligne);
-
-
+            if (zone == ConsoleZone.Left)
+                _topLeft = 0;
+            else
+                _topRight = 0;
         }
-        public static void WriteLeft(this string chaine, ConsoleColor color)
+
+        public static void WriteLeft(this string text, ConsoleColor color)
         {
-
-            lock (_consoleLock)
+            lock (_lockLeft)
             {
-                ClearHalfConsole(ConsoleZone.Left, _leftSide, ref _leftTop);
-
-                // Déplacer le curseur
-                Console.SetCursorPosition(_leftSide, ++_leftTop);
-
-
-                Console.ForegroundColor = color;
-                Console.Write(chaine);
-                _lastLeftStringwrittenLength = chaine.Length;
+                Write(text, ConsoleZone.Left, ref _topLeft, color, newLine: false);
             }
-
         }
-        public static void WriteRight(this string chaine, ConsoleColor color)
+
+        public static void WriteLineLeft(this string text, ConsoleColor color)
         {
-
-            lock (_consoleLockDroite)
+            lock (_lockLeft)
             {
-                ClearHalfConsole(ConsoleZone.Left, _rightSide, ref _rigtTop);
-               
-                
-                Console.SetCursorPosition(_rightSide, ++_rigtTop);
-
-                Console.ForegroundColor = color;
-                Console.Write(chaine);
-                Console.SetCursorPosition(++_lastLeftStringwrittenLength, _leftTop);
+                Write(text, ConsoleZone.Left, ref _topLeft, color, newLine: true);
             }
         }
-        public static void WriteLineLeft(this string chaine, ConsoleColor color)
+
+        public static void WriteRight(this string text, ConsoleColor color)
         {
-
-            lock (_consoleLock)
+            lock (_lockRight)
             {
-                ClearHalfConsole(ConsoleZone.Left, _leftSide, ref _leftTop);
-
-
-                Console.SetCursorPosition(_leftSide, ++_leftTop);
-                Console.ForegroundColor = color;
-                Console.Write(chaine);
-                _lastLeftStringwrittenLength = chaine.Length;
+                Write(text, ConsoleZone.Right, ref _topRight, color, newLine: false);
             }
-
         }
-        public static void WriteLineRight(this string chaine, ConsoleColor color)
+
+        public static void WriteLineRight(this string text, ConsoleColor color)
         {
-            lock (_consoleLockDroite)
+            lock (_lockRight)
             {
-                ClearHalfConsole(ConsoleZone.Right, _rightSide, ref _rigtTop);
-
-
-                Console.SetCursorPosition(_rightSide, ++_rigtTop);
-                Console.ForegroundColor = color;
-                Console.Write(chaine);
-                Console.SetCursorPosition(++_lastLeftStringwrittenLength, _leftTop);
+                Write(text, ConsoleZone.Right, ref _topRight, color, newLine: true);
             }
-
         }
+
         public static string ReadLineLeft(ConsoleColor color)
         {
-
-            lock (_consoleLock)
+            lock (_lockLeft)
             {
-                ClearHalfConsole(ConsoleZone.Left, _leftSide, ref _leftTop);
-                
-                Console.SetCursorPosition(_leftSide, _leftTop);
-                // Positionner le curseur dans la zone gauche
-                Console.SetCursorPosition(_lastLeftStringwrittenLength + 1, _leftTop);
+                int cursorLeft = LeftStart + 0;
+                Console.SetCursorPosition(cursorLeft, _topLeft);
                 Console.ForegroundColor = color;
-                return Console.ReadLine();
+                string? input = Console.ReadLine();
+                _topLeft++;
+                return input ?? string.Empty;
             }
+        }
+
+        private static void Write(string text, ConsoleZone zone, ref int top, ConsoleColor color, bool newLine)
+        {
+            int left = zone == ConsoleZone.Left ? LeftStart : RightStart;
+
+            // Clamp the top to avoid overflow
+            if (top >= Console.WindowHeight - 1)
+            {
+                ClearZone(zone);
+                top = 0;
+            }
+
+            // Clear current line fully
+            Console.SetCursorPosition(left, top);
+            Console.Write(new string(' ', HalfWidth - Margin * 2));
+
+            // Reset cursor and write fresh
+            Console.SetCursorPosition(left, top);
+            Console.ForegroundColor = color;
+            Console.Write(text);
+
+            if (newLine) top++;
         }
 
     }
