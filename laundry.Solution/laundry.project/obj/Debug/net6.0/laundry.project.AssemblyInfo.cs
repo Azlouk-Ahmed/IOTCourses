@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("laundry.project")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c06895dd13a1d44a41c9c4b7562856ef10cced98")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+27ba7a5cbd14f13979a48404ee85d624e9863108")]
 [assembly: System.Reflection.AssemblyProductAttribute("laundry.project")]
 [assembly: System.Reflection.AssemblyTitleAttribute("laundry.project")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

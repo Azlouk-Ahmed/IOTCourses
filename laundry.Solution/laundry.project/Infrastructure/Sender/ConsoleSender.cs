@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace laundry.project.Infrastructure
+namespace laundry.project.Infrastructure.Sender
 {
     internal class ConsoleSender : ISender
     {

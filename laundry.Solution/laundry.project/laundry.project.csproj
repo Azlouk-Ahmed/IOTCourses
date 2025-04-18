@@ -11,4 +11,11 @@
     <Folder Include="Business\Helper\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="dotenv.net" Version="3.2.1" />
+    <PackageReference Include="Microsoft.Azure.Devices" Version="1.40.0" />
+    <PackageReference Include="Microsoft.Azure.Devices.Client" Version="1.42.3" />
+    <PackageReference Include="Microsoft.Azure.Devices.Shared" Version="1.30.4" />
+  </ItemGroup>
+
 </Project>

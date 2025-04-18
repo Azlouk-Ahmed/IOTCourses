@@ -50,6 +50,24 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
+          "dependencies": {
+            "Microsoft.Azure.Devices": {
+              "target": "Package",
+              "version": "[1.40.0, )"
+            },
+            "Microsoft.Azure.Devices.Client": {
+              "target": "Package",
+              "version": "[1.42.3, )"
+            },
+            "Microsoft.Azure.Devices.Shared": {
+              "target": "Package",
+              "version": "[1.30.4, )"
+            },
+            "dotenv.net": {
+              "target": "Package",
+              "version": "[3.2.1, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

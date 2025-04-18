@@ -96,6 +96,41 @@ namespace laundry.project.Presentation.ConsoleUi
             $"╚{border}╝".WriteLineRight(color);
             " ".WriteLineRight(color); // Empty line after header
         }
+
+        public static void ShowLoader(string message, CancellationToken token)
+        {
+            var spinner = new[] { '|', '/', '-', '\\' };
+            int i = 0;
+            object locker = new object();
+
+
+            int fixedTop = 1;
+
+            while (!token.IsCancellationRequested)
+            {
+
+                while (Console.KeyAvailable) Console.ReadKey(true);
+
+                lock (locker)
+                {
+                    int rightPadding = Console.WindowWidth - (message.Length + 6);
+                    Console.SetCursorPosition(rightPadding, fixedTop);
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Write($"{message}... {spinner[i++ % spinner.Length]}");
+                    Console.ResetColor();
+                }
+
+                Thread.Sleep(100);
+            }
+
+
+            lock (locker)
+            {
+                int rightPadding = Console.WindowWidth - (message.Length + 6);
+                Console.SetCursorPosition(rightPadding, fixedTop);
+                Console.Write(new string(' ', message.Length + 6));
+            }
+        }
         public static void WriteSectionTitleLeft(string title, ConsoleColor color)
         {
             " ".WriteLineLeft(ConsoleColor.White); // Empty line before section

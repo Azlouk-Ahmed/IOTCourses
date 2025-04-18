@@ -78,17 +78,23 @@ namespace laundry.project
         {
             ConsoleUI.ShowLoading("Initializing system components...");
             SensorManager sensor = new();
-            ISender sender = new ConsoleSender();
+
+            string connectionString = "HostName=tpnumero3.azure-devices.net;DeviceId=my-device-id;SharedAccessKey=pdkW0Ryvk4tcmW3PaD7/ToSIRluoweUW1iccqtrqUkc=";
+
+
+            var compositeSender = new CompositeSender();
+            compositeSender.AddSender(new ConsoleSender());
+            compositeSender.AddSender(new IoTHubSender(connectionString));
+
 
             ConsoleUI.ShowLoading("Starting machine monitoring...");
-            StateMachineManager.LancerStateMachine(machines, sensor, sender);
-
+            StateMachineManager.LancerStateMachine(machines, sensor, compositeSender);
             ConsoleUI.ShowSuccess("System initialization complete.");
             Thread.Sleep(1500);
         }
 
-        // Utility methods
-      
+
+
 
         static void PromptInput(string message)
         {

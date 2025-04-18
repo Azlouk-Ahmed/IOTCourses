@@ -1,5 +1,5 @@
 ﻿using laundry.project.Entities;
-using laundry.project.Infrastructure.Sender;
+using laundry.project.Infrastructure;
 using laundry.project.Interfaces;
 using laundry.project.Presentation;
 using System;
